@@ -68,17 +68,18 @@
              Directory="ProgramMenuFolder"
              Name="YubiKeyLocker"
              Target="[INSTALLFOLDER]yubikey-locker.exe"
-             WorkingDirectory="INSTALLFOLDER" />
+             WorkingDirectory="INSTALLFOLDER">
 
-   <!-- This adds the AUMID association -->
-   <ShortcutProperty Id="AUMIDProperty"
-                     Shortcut="YubiLockerStartMenuShortcut"
-                     Key="System.AppUserModel.ID"
-                     Value="Sciber.YubiKeyLocker_YubiKeyLocker" />
+      <!-- This adds the AUMID association inside the Shortcut element -->
+      <ShortcutProperty Id="AUMIDProperty"
+                        Key="System.AppUserModel.ID"
+                        Value="Sciber.YubiKeyLocker_YubiKeyLocker" />
+   </Shortcut>
 
    <RemoveFolder Id="YubiKeyLockerFolder" On="uninstall" />
    <RegistryValue Root="HKCU" Key="Software\Sciber\YubiKeyLocker" Name="installed" Type="integer" Value="1" KeyPath="yes" />
 </Component>
+
 
 
 
