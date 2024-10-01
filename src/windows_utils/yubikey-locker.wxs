@@ -63,6 +63,24 @@
             </Component>
         </DirectoryRef>
 
+<Component Id="YubiLockerShortcut" Guid="{A7B01F56-4C65-4F79-97E5-5B456F3C8D32}">
+   <Shortcut Id="YubiLockerStartMenuShortcut"
+             Directory="ProgramMenuFolder"
+             Name="YubiKeyLocker"
+             Target="[INSTALLFOLDER]yubikey-locker.exe"
+             WorkingDirectory="INSTALLFOLDER" />
+
+   <!-- This adds the AUMID association -->
+   <ShortcutProperty Id="AUMIDProperty"
+                     Shortcut="YubiLockerStartMenuShortcut"
+                     Key="System.AppUserModel.ID"
+                     Value="Sciber.YubiKeyLocker_YubiKeyLocker" />
+
+   <RemoveFolder Id="YubiKeyLockerFolder" On="uninstall" />
+   <RegistryValue Root="HKCU" Key="Software\Sciber\YubiKeyLocker" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+</Component>
+
+
 
         <!-- Tell WiX to install the files -->
         <Feature Id="Service" Title="YubiKey Locker by Sciber installer" Level="1">
