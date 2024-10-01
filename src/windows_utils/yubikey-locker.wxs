@@ -6,86 +6,82 @@
 <?define Version = "1.0.0.5" ?>
 <?define UpgradeCode = "43768026-8bd2-4d87-8106-538f0e328174" ?> <!-- Generated with $([System.Guid]::NewGuid()).Guid -->
 
-
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
   <Package Name="$(Name)"
            Manufacturer="$(Manufacturer)"
            Version="$(Version)"
            UpgradeCode="$(UpgradeCode)"
-           Compressed="yes"
-           >
+           Compressed="yes">
 
-        <MediaTemplate EmbedCab="yes" />
+    <MediaTemplate EmbedCab="yes" />
 
-        <!-- Upgrade logic -->
-        <!-- AllowSameVersionUpgrades -> Always upgrade, never allow two versions to be installed next to each other -->
-        <MajorUpgrade DowngradeErrorMessage="The same or a newer version of this product is already installed" AllowSameVersionUpgrades="yes" />
+    <!-- Upgrade logic -->
+    <MajorUpgrade DowngradeErrorMessage="The same or a newer version of this product is already installed" AllowSameVersionUpgrades="yes" />
 
+    <!-- Define the directory structure -->
+    <StandardDirectory Id="ProgramFiles64Folder">
+      <Directory Name="$(Manufacturer)">
+        <Directory Id="INSTALLFOLDER" Name="$(Name)" />
+      </Directory>
+    </StandardDirectory>
 
-        <!-- Define the directory structure -->
-                 <!-- Create a folder inside program files  -->
-                <StandardDirectory Id="ProgramFiles64Folder">
-                    <Directory  Name="$(Manufacturer)">
-                        <!-- Create a folder within the parent folder given the name -->
-                        <Directory Id="INSTALLFOLDER" Name="$(Name)" />
-                    </Directory>
-                </StandardDirectory>
+    <!-- Reference the INSTALLFOLDER directory -->
+    <DirectoryRef Id="INSTALLFOLDER">
 
-        <!-- The files inside this DirectoryRef are linked to
-             the YubiKeyLocker directory via INSTALLFOLDER -->
-        <DirectoryRef Id="INSTALLFOLDER">
+      <!-- Create a component for the executable -->
+      <Component Id="ServiceExecutable" Guid="*">
+        <File Id="YubiKeyLocker"
+              Source="dist/yubikey-locker.exe"
+              KeyPath="true" />
 
-            <!-- Create a single component which is the yubikey-locker.exe file -->
-            <Component Id="ServiceExecutable" Bitness="always64">
-                <File Id="YubiKeyLocker"
-                      Source="dist/yubikey-locker.exe"
-                      KeyPath="true" />
+        <!-- Remove all files from the INSTALLFOLDER on uninstall -->
+        <RemoveFile Id="ALLFILES" Name="*.*" On="both" />
 
-                <!-- Remove all files from the INSTALLFOLDER on uninstall -->
-                <RemoveFile Id="ALLFILES" Name="*.*" On="both" />
+        <!-- Install and control the service -->
+        <ServiceInstall Id="ServiceInstaller"
+                        Type="ownProcess"
+                        Name="YubiKeyLocker"
+                        DisplayName="$(Name)"
+                        Description="YubiKey Locker by Sciber"
+                        Start="auto"
+                        ErrorControl="normal" />
 
-                <!-- Tell WiX to install the Service -->
-                <ServiceInstall Id="ServiceInstaller"
-                                Type="ownProcess"
-                                Name="YubiKeyLocker"
-                                DisplayName="$(Name)"
-                                Description="YubiKey Locker by Sciber"
-                                Start="auto"
-                                ErrorControl="normal" />
+        <ServiceControl Id="StartService"
+                        Start="install"
+                        Stop="both"
+                        Remove="uninstall"
+                        Name="YubiKeyLocker"
+                        Wait="true" />
+      </Component>
 
-                <!-- Tell WiX to start the Service -->
-                <ServiceControl Id="StartService"
-                                Start="install"
-                                Stop="both"
-                                Remove="uninstall"
-                                Name="YubikeyLocker"
-                                Wait="true" />
-            </Component>
-        </DirectoryRef>
+      <!-- Component for the shortcut -->
+      <Component Id="YubiLockerShortcut" Guid="{A7B01F56-4C65-4F79-97E5-5B456F3C8D32}">
+        <Shortcut Id="YubiLockerStartMenuShortcut"
+                  Directory="ProgramMenuFolder"
+                  Name="YubiKeyLocker"
+                  Target="[INSTALLFOLDER]yubikey-locker.exe"
+                  WorkingDirectory="INSTALLFOLDER">
 
-<Component Id="YubiLockerShortcut" Guid="{A7B01F56-4C65-4F79-97E5-5B456F3C8D32}">
-   <Shortcut Id="YubiLockerStartMenuShortcut"
-             Directory="ProgramMenuFolder"
-             Name="YubiKeyLocker"
-             Target="[INSTALLFOLDER]yubikey-locker.exe"
-             WorkingDirectory="INSTALLFOLDER">
+          <!-- AUMID association for Assigned Access (Kiosk Mode) -->
+          <ShortcutProperty Id="AUMIDProperty"
+                            Key="System.AppUserModel.ID"
+                            Value="Sciber.YubiKeyLocker_YubiKeyLocker" />
+        </Shortcut>
 
-      <!-- This adds the AUMID association inside the Shortcut element -->
-      <ShortcutProperty Id="AUMIDProperty"
-                        Key="System.AppUserModel.ID"
-                        Value="Sciber.YubiKeyLocker_YubiKeyLocker" />
-   </Shortcut>
+        <!-- Remove the folder on uninstall -->
+        <RemoveFolder Id="YubiKeyLockerFolder" On="uninstall" />
+        <RegistryValue Root="HKCU" Key="Software\Sciber\YubiKeyLocker" Name="installed" Type="integer" Value="1" KeyPath="yes" />
+      </Component>
 
-   <RemoveFolder Id="YubiKeyLockerFolder" On="uninstall" />
-   <RegistryValue Root="HKCU" Key="Software\Sciber\YubiKeyLocker" Name="installed" Type="integer" Value="1" KeyPath="yes" />
-</Component>
+    </DirectoryRef>
 
+    <!-- Main feature that ties everything together -->
+    <Feature Id="MainFeature" Title="YubiKeyLocker" Level="1">
+      <!-- Reference to the service component -->
+      <ComponentRef Id="ServiceExecutable" />
+      <!-- Reference to the shortcut component -->
+      <ComponentRef Id="YubiLockerShortcut" />
+    </Feature>
 
-
-
-        <!-- Tell WiX to install the files -->
-        <Feature Id="Service" Title="YubiKey Locker by Sciber installer" Level="1">
-            <ComponentRef Id="ServiceExecutable" />
-        </Feature>
-    </Package>
+  </Package>
 </Wix>
