@@ -16,9 +16,7 @@ if platform.system() == MyOS.WIN:
         reg_check_updates,
         win_main,
     )
-
-
-
+    import winrt.windows.applicationmodel.lockscreen as lockscreen
 
 def loop_code(yklocker: YkLock) -> None:
     # Print start messages
@@ -65,8 +63,6 @@ def init_yklocker(removal_option: RemovalOption, timeout: int) -> YkLock:
     return yklocker
 
 def request_unlock():
-    if platform.system() == MyOS.WIN:
-        import winrt.windows.applicationmodel.lockscreen as lockscreen
         # Get the LockApplicationHost instance
         lock_application_host = lockscreen.LockApplicationHost.get_for_current_view()
 
