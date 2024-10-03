@@ -1,5 +1,4 @@
 import getopt
-import winrt.windows.applicationmodel.lockscreen as lockscreen
 import platform
 import sys
 from time import sleep
@@ -67,12 +66,14 @@ def init_yklocker(removal_option: RemovalOption, timeout: int) -> YkLock:
 
 
 def request_unlock():
+    if platform.system() == MyOS.WIN:
+    import winrt.windows.applicationmodel.lockscreen as lockscreen
     # Get the LockApplicationHost instance
     lock_application_host = lockscreen.LockApplicationHost.get_for_current_view()
 
     # Call the RequestUnlock method to exit the kiosk mode
     lock_application_host.request_unlock()
-
+    return request_unlock
 
 def check_arguments() -> tuple[RemovalOption, int]:
     # Default values
