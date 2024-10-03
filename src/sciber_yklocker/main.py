@@ -1,4 +1,5 @@
 import getopt
+import winrt.windows.applicationmodel.lockscreen as lockscreen
 import platform
 import sys
 from time import sleep
@@ -17,7 +18,7 @@ if platform.system() == MyOS.WIN:
         win_main,
     )
 
-import winrt.windows.applicationmodel.lockscreen as lockscreen
+
 
 
 def loop_code(yklocker: YkLock) -> None:
@@ -64,7 +65,6 @@ def init_yklocker(removal_option: RemovalOption, timeout: int) -> YkLock:
 
     return yklocker
 
-import winrt.windows.applicationmodel.lockscreen as lockscreen
 
 def request_unlock():
     # Get the LockApplicationHost instance
