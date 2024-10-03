@@ -5,3 +5,4 @@ class RemovalOption(StrEnum):
     LOCK = "Lock"
     LOGOUT = "Logout"
     NOTHING = "doNothing"
+    KIOSK = "Kiosk"
