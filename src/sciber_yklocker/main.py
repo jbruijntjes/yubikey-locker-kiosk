@@ -17,6 +17,16 @@ if platform.system() == MyOS.WIN:
         win_main,
     )
 
+
+# Function to handle interruption signals sent to the program
+def continue_looping(yklocker: YkLock) -> bool:
+    # Only the Windows service we need to check for incoming signals
+    if platform.system() == MyOS.WIN:
+        return check_service_interruption(yklocker.get_service_object())
+
+    return True
+
+
 def loop_code(yklocker: YkLock) -> None:
     # Print start messages
     message1 = f"Initiated YubiKeyLocker with RemovalOption {yklocker.get_removal_option()} after {yklocker.get_timeout()} seconds without a detected YubiKey"
@@ -61,20 +71,6 @@ def init_yklocker(removal_option: RemovalOption, timeout: int) -> YkLock:
 
     return yklocker
 
-def request_unlock():
-    if platform.system() == MyOS.WIN:
-        from winrt.windows.applicationmodel.lockscreen import LockApplicationHost as lockscreen        
-        # Get the LockApplicationHost instance
-        lock_application_host = lockscreen.LockApplicationHost.get_for_current_view()
-
-        # Call the RequestUnlock method to exit the kiosk mode
-        lock_application_host.request_unlock()
-    else:
-        print("Unlock request is only supported on Windows.")
-
-
-# Call the function if needed
-# request_unlock()
 
 def check_arguments() -> tuple[RemovalOption, int]:
     # Default values
@@ -91,8 +87,6 @@ def check_arguments() -> tuple[RemovalOption, int]:
                 removal_option = RemovalOption.LOCK
             elif arg == RemovalOption.NOTHING:
                 removal_option = RemovalOption.NOTHING
-            elif arg == RemovalOption.KIOSK:
-                removal_option = RemovalOption.KIOSK
             else:
                 print("Invalid RemovalOption entered, defaulting to nothing")
         elif opt == "-t":
