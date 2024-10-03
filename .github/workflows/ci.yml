@@ -41,7 +41,7 @@ jobs:
         name: "Windows specific dependencies" # Install necessary prerequisites
         run: |
           echo "Installing Windows specific dependencies"
-          pip install pywinrt
+          pip install winrt-Windows.ApplicationModel.LockScreen
 
       - name: Install dependencies # Common for all OS's
         run: |
