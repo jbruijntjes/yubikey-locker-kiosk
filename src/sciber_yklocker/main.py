@@ -68,7 +68,7 @@ def request_unlock():
 
         # Call the RequestUnlock method to exit the kiosk mode
         lock_application_host.request_unlock()
-    else:
+        else:
         print("Unlock request is only supported on Windows.")
 
 # Call the function if needed
