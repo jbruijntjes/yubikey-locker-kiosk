@@ -63,13 +63,17 @@ def init_yklocker(removal_option: RemovalOption, timeout: int) -> YkLock:
     return yklocker
 
 def request_unlock():
+    if platform.system() == MyOS.WIN:
+        #import winrt.windows.applicationmodel.lockscreen as lockscreen
+        
         # Get the LockApplicationHost instance
         lock_application_host = lockscreen.LockApplicationHost.get_for_current_view()
 
         # Call the RequestUnlock method to exit the kiosk mode
         lock_application_host.request_unlock()
-        else:
+    else:
         print("Unlock request is only supported on Windows.")
+
 
 # Call the function if needed
 # request_unlock()
