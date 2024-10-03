@@ -17,9 +17,6 @@ if platform.system() == MyOS.WIN:
         win_main,
     )
 
-def continue_looping(yklocker: YkLock) -> bool:
-    return yklocker.is_yubikey_connected()  # Example logic for continuing the loop
-
 def loop_code(yklocker: YkLock) -> None:
     # Print start messages
     message1 = f"Initiated YubiKeyLocker with RemovalOption {yklocker.get_removal_option()} after {yklocker.get_timeout()} seconds without a detected YubiKey"
