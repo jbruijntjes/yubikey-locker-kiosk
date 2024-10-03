@@ -135,7 +135,7 @@ jobs:
           wix.exe build -arch x64 .\src\windows_utils\yubikey-locker.wxs
           cp .\src\windows_utils\${{matrix.msi_filename}} dist/${{matrix.msi_filename}}
           ls dist
-
+          pip install winrt
       - if: matrix.os == 'windows-2022'
         name: "Windows MSI install"
         run: |
