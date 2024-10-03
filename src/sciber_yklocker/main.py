@@ -16,7 +16,7 @@ if platform.system() == MyOS.WIN:
         reg_check_updates,
         win_main,
     )
-    import winrt.windows.applicationmodel.lockscreen as lockscreen
+   from winrt-windows.applicationmodel.lockscreen02.2.0 import LockApplicationHost as lockscreen
 
 def loop_code(yklocker: YkLock) -> None:
     # Print start messages
