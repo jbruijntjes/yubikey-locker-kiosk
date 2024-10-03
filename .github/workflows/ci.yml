@@ -41,7 +41,7 @@ jobs:
         name: "Windows specific dependencies" # Install necessary prerequisites
         run: |
           echo "Installing Windows specific dependencies"
-          pip install winrt # or any other Windows-specific packages
+          pip install pywinrt
 
       - name: Install dependencies # Common for all OS's
         run: |
