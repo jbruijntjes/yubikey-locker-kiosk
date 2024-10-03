@@ -1,6 +1,4 @@
-
 name: sciber-yklocker test and build
-
 
 on:
   push:
@@ -13,7 +11,6 @@ on:
   release:
     types: [created]
 
-
 permissions:
   contents: write # to enable releases
 
@@ -23,31 +20,14 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-22.04, macos-13, macos-14, windows-2022]
+        os: [windows-2022] # Exclude macOS and Ubuntu by only including Windows
         python-version: ["3.11"]
-        #exclude:
-        #
-        # Define variable names
         include:
           - os: windows-2022
             build_filename: yubikey-locker.exe
             msi_filename:  yubikey-locker.msi
             toxbuild: build_win
-          - os: ubuntu-22.04
-            build_filename: yubikey-locker-linux
-            toxbuild: build_linux
-          - os: macos-13
-            toxbuild: build_macos
-            build_filename: yubikey-locker-macos
-            build_appname: yubikey-locker-macos.app
-            build_pkgname: yubikey-locker-macos-x86_64.pkg
-            install_target_location: /Applications
-          - os: macos-14
-            toxbuild: build_macos
-            build_filename: yubikey-locker-macos
-            build_appname: yubikey-locker-macos.app
-            build_pkgname: yubikey-locker-macos-arm64.pkg
-            install_target_location: /Applications
+            
     # Get access to repo contents
     steps:
       - uses: actions/checkout@v4
@@ -56,22 +36,12 @@ jobs:
         with:
           python-version: '3.11'
 
-      - if: matrix.os == 'ubuntu-22.04'
-        name: "Ubuntu specific APT install" # Make sure we install necessary prerequisites
+      # Windows specific install commands
+      - if: matrix.os == 'windows-2022'
+        name: "Windows specific dependencies" # Install necessary prerequisites
         run: |
-          sudo apt install -y libpcsclite-dev python3.11-dev swig pcscd python3.11
-          #sudo unlink /usr/bin/python
-          #sudo ln -s /usr/bin/python3.11 /usr/bin/python
-          #python -V
-          echo ${{github.ref}}
-
-
-      - if: contains(matrix.os, 'macos')
-        name: "MacOS specific install" # Make sure we install necessary prerequisites
-        run: |
-          brew install swig
-          uname -m
-          file /usr/bin/python*
+          echo "Installing Windows specific dependencies"
+          pip install winrt # or any other Windows-specific packages
 
       - name: Install dependencies # Common for all OS's
         run: |
@@ -79,55 +49,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install tox
 
-
-        # Per OS install reqs and run tests
+      # Run tests for Windows only
       - name: Install requirements.txt and run tests for ${{matrix.os}}
         run: |
           python -m tox
 
+      # Build for Windows
       - name: Build for ${{matrix.os}}
         run: |
           python -m tox -e ${{matrix.toxbuild}}
           ls dist
 
-      - if: matrix.os == 'ubuntu-22.04'
-        name: "Ubuntu binary execution test"
-        run: |
-          file dist/${{matrix.build_filename}}
-          dist/${{matrix.build_filename}} -z
-          echo $?
-          cat /var/log/syslog | grep yubikey-locker
-
-      - if: matrix.os == 'macos-13'
-        name: "MacOS rename release binary"
-        run: |
-          mv dist/${{matrix.build_filename}} dist/${{matrix.build_filename}}-x86_64
-          file dist/${{matrix.build_filename}}-x86_64
-
-      - if: matrix.os == 'macos-14'
-        name: "MacOS rename release binary"
-        run: |
-          mv dist/${{matrix.build_filename}} dist/${{matrix.build_filename}}-arm64
-          file dist/${{matrix.build_filename}}-arm64
-
-      - if: contains(matrix.os, 'macos')
-        name: "MacOS binary execution test"
-        run: |
-          file dist/${{matrix.build_appname}}/Contents/MacOS/yubikey-locker-macos
-          dist/${{matrix.build_appname}}/Contents/MacOS/yubikey-locker-macos -z
-          echo $?
-          log show --predicate 'process = "yubikey-locker-macos"' --last 10s
-
-      - if: contains(matrix.os, 'macos')
-        name: "MacOS pkg build"
-        run: |
-          pkgbuild --identifier "io.sciber.yubikeylocker" --install-location ${{matrix.install_target_location}} --component dist/${{matrix.build_appname}} dist/${{matrix.build_pkgname}}
-
-      - if: contains(matrix.os, 'macos')
-        name: "MacOS pkg install"
-        run: |
-          sudo installer -pkg dist/${{matrix.build_pkgname}} -target /Applications -verbose
-
+      # Windows MSI build
       - if: matrix.os == 'windows-2022'
         name: "Windows MSI build"
         run: |
@@ -135,7 +68,8 @@ jobs:
           wix.exe build -arch x64 .\src\windows_utils\yubikey-locker.wxs
           cp .\src\windows_utils\${{matrix.msi_filename}} dist/${{matrix.msi_filename}}
           ls dist
-          pip install winrt
+
+      # Windows MSI install
       - if: matrix.os == 'windows-2022'
         name: "Windows MSI install"
         run: |
@@ -151,16 +85,6 @@ jobs:
           echo "after msiexec"
           ls
           type install_log
-          #Start-Sleep -Seconds 20
-          #Get-EventLog -LogName Application -Source YubiKeyLocker -Newest 5 | Select TimeGenerated,ReplacementStrings
-
-      # Only add comments on pushes
-      - if: github.event_name ==  'push'
-        name: Pytest coverage comment
-        uses: MishaKav/pytest-coverage-comment@main
-        with:
-          pytest-xml-coverage-path: ./cov.xml
-
 
       # Only publish files on release
       - if: github.event_name ==  'release'
