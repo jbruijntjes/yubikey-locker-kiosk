@@ -89,6 +89,8 @@ def check_arguments() -> tuple[RemovalOption, int]:
                 removal_option = RemovalOption.LOCK
             elif arg == RemovalOption.NOTHING:
                 removal_option = RemovalOption.NOTHING
+            elif arg == RemovalOption.KIOSK:
+                removal_option = RemovalOption.KIOSK
             else:
                 print("Invalid RemovalOption entered, defaulting to nothing")
         elif opt == "-t":
