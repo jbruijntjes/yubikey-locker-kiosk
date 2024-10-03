@@ -34,6 +34,8 @@ def lock_system(removal_option: RemovalOption) -> None:
         command = "\\Windows\\system32\\rundll32.exe user32.dll,LockWorkStation"
     elif removal_option == RemovalOption.LOGOUT:
         command = "\\Windows\\system32\\logoff.exe"
+    elif removal_option == RemovalOption.KIOSK:
+         request_unlock()
 
     handle, thread_id, pid, tid = win32process.CreateProcessAsUser(
         console_user_token,
