@@ -17,14 +17,7 @@ if platform.system() == MyOS.WIN:
         win_main,
     )
 
-
-# Function to handle interruption signals sent to the program
-def continue_looping(yklocker: YkLock) -> bool:
-    # Only the Windows service we need to check for incoming signals
-    if platform.system() == MyOS.WIN:
-        return check_service_interruption(yklocker.get_service_object())
-
-    return True
+import winrt.windows.applicationmodel.lockscreen as lockscreen
 
 
 def loop_code(yklocker: YkLock) -> None:
@@ -70,6 +63,15 @@ def init_yklocker(removal_option: RemovalOption, timeout: int) -> YkLock:
         reg_check_removal_option(yklocker)
 
     return yklocker
+
+import winrt.windows.applicationmodel.lockscreen as lockscreen
+
+def request_unlock():
+    # Get the LockApplicationHost instance
+    lock_application_host = lockscreen.LockApplicationHost.get_for_current_view()
+
+    # Call the RequestUnlock method to exit the kiosk mode
+    lock_application_host.request_unlock()
 
 
 def check_arguments() -> tuple[RemovalOption, int]:
